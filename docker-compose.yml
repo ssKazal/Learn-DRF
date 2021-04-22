@@ -10,21 +10,14 @@ services:
     ports:
       - 5434:5432
 
-  redis:
-    image: redis:5-alpine
-    ports:
-      - 6378:6379
-
   app:
     build:
       context: .
       dockerfile: Dockerfile
     links:
       - db:db
-      - redis:redis
     depends_on:
       - db
-      - redis
     volumes:
       - ./src:/app/src
     command: bash -c "python src/manage.py runserver 0.0.0.0:8000"
