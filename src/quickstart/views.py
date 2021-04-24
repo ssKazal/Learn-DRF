@@ -4,6 +4,9 @@ from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.parsers import JSONParser
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import UserSerializer, GroupSerializer, ArticleSerializer
@@ -22,6 +25,8 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+############# Fuction based api view ##################
+"""
 @csrf_exempt
 def article(request):
     # list of article
@@ -58,3 +63,41 @@ def article_detail(request, pk):
     elif request.method == 'DELETE':
         article.delete()
         return HttpResponse(status=204)
+"""
+
+
+############# Fuction based api view with decorator @api_view ##################
+@api_view(['GET', 'POST'])
+def article(request):
+    # list of article
+    if request.method == 'GET':
+        articles = Article.objects.all().order_by('-id')
+        serializer = ArticleSerializer(articles, many=True)
+        return Response(serializer.data)
+    # create article
+    elif request.method == 'POST':
+        serializer = ArticleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', 'PUT', 'DELETE'])
+def article_detail(request, pk):
+    article = get_object_or_404(Article, pk=pk)
+    # retrive data
+    if request.method == 'GET':
+        serializer = ArticleSerializer(article)
+        return Response(serializer.data)
+    # update the retrive data
+    elif request.method == 'PUT':
+        serializer = ArticleSerializer(article, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # delete the retrive data
+    elif request.method == 'DELETE':
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
