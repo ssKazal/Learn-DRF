@@ -7,12 +7,14 @@ from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets
 from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import UserSerializer, GroupSerializer, ArticleSerializer
 from .models import Article
 
 
+############# quick tutirial ########################
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
@@ -99,5 +101,38 @@ def article_detail(request, pk):
         return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # delete the retrive data
     elif request.method == 'DELETE':
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+################ viewset #####################################
+class ArticleViewSet(viewsets.ViewSet):
+    def list(self, request):
+        articles = Article.objects.all().order_by('-id')
+        serializer = ArticleSerializer(articles, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = ArticleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, pk=None):
+        queryset = get_object_or_404(Article, pk=pk)
+        serializer = ArticleSerializer(queryset)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        article = get_object_or_404(Article, pk=pk)
+        serializer = ArticleSerializer(article, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        article = get_object_or_404(Article, pk=pk)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
