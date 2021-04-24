@@ -106,6 +106,7 @@ def article_detail(request, pk):
 
 
 ################ viewset #####################################
+"""
 class ArticleViewSet(viewsets.ViewSet):
     def list(self, request):
         articles = Article.objects.all().order_by('-id')
@@ -136,3 +137,10 @@ class ArticleViewSet(viewsets.ViewSet):
         article = get_object_or_404(Article, pk=pk)
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+"""
+
+
+################ modelviewset ##############################
+class ArticleViewSet(viewsets.ModelViewSet):
+    queryset = Article.objects.all()
+    serializer_class = ArticleSerializer
