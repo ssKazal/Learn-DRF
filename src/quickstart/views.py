@@ -8,6 +8,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import UserSerializer, GroupSerializer, ArticleSerializer
@@ -144,3 +146,12 @@ class ArticleViewSet(viewsets.ViewSet):
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class AuthorViewSet(viewsets.ModelViewSet):
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Article.objects.filter(author='Kazal')
