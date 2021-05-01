@@ -1,22 +1,7 @@
-FROM python:3.8-alpine
-
-ENV PYTHONUNBUFFERED 1
-ENV PORT 8000
-
-ENV TZ=Asia/Dhaka
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
+FROM python:3.8.5
+ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 RUN mkdir src
-
-RUN apt-get update && apt-get install build-essential curl -y && \
-    pip3 install -U pip
-
-ADD requirements.txt /app
-
-RUN pip3 install -r requirements.txt && \
-    apt-get --purge autoremove build-essential -y
-
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
 COPY src/ /app/src/
-
-EXPOSE $PORT

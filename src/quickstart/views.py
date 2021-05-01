@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User, Group
+
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.parsers import JSONParser
@@ -10,8 +11,13 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import filters
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 from django.views.decorators.csrf import csrf_exempt
 
+from .permissions import IsSuperuser, IsCourseAdmin
 from .serializers import UserSerializer, GroupSerializer, ArticleSerializer
 from .models import Article
 
@@ -26,7 +32,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 ############# Fuction based api view ##################
@@ -142,11 +148,22 @@ class ArticleViewSet(viewsets.ViewSet):
 """
 
 
-################ modelviewset ##############################
+############## modelviewset, DjangoFilterBackend ################
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSuperuser]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['title']
+
+
+############## modelviewset, SearchFilter ################
+# class ArticleViewSet(viewsets.ModelViewSet):
+#     queryset = Article.objects.all()
+#     serializer_class = ArticleSerializer
+#     permission_classes = [IsAuthenticated, IsSuperuser]
+#     filter_backends = [filters.SearchFilter]
+#     search_fields = ['title']
 
 
 class AuthorViewSet(viewsets.ModelViewSet):

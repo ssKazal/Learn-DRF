@@ -3,13 +3,22 @@ from rest_framework import serializers
 from .models import Article
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+# ModelSerializer
+class ArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = '__all__'
+
+
+class UserSerializer(serializers.ModelSerializer):
+    articles = ArticleSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'groups']
+        fields = ['url', 'username', 'email', 'groups', 'articles']
 
 
-class GroupSerializer(serializers.HyperlinkedModelSerializer):
+class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['url', 'name']
@@ -34,10 +43,3 @@ class ArticleSerializer(serializers.Serializer):
         instance.save()
         return instance
 """
-
-
-# ModelSerializer
-class ArticleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Article
-        fields = '__all__'
