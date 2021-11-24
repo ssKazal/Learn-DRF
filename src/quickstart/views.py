@@ -17,16 +17,33 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from django.views.decorators.csrf import csrf_exempt
 
+from user import models
+
 from .permissions import IsSuperuser, IsCourseAdmin
-from .serializers import UserSerializer, GroupSerializer, ArticleSerializer
-from .models import Article
+from .serializers import UserSerializer, GroupSerializer, ArticleSerializer, GenreSerializer, MovieSerializer
+from .models import Article, Genre, Movie, User
 
 
 ############# quick tutirial ########################
+
+def home(request):
+    context = {}
+    return render(request, 'home/home.html', context)
+
+
+def login(request):
+    context = {}
+    return render(request, 'login/login.html', context)
+
+
+def registration(request):
+    context = {}
+    return render(request, 'registration/registration.html', context)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -172,3 +189,13 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Article.objects.filter(author='Kazal')
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    serializer_class = GenreSerializer
+    queryset = Genre.objects.all()
+
+
+class MovieViewSet(viewsets.ModelViewSet):
+    serializer_class = MovieSerializer
+    queryset = Movie.objects.all()

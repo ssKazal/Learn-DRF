@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <h1>Login</h1>
+<div>
+    <a href="{% url 'home' %}">Back</a>
+</div>
+<br>
+<div class="container">
+    <form>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input id="email" name="email" type="email" class="form-control" placeholder="name@example.com">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input id="password" name="password" type="password" class="form-control">
+        </div>
+        <button id="login" class="btn btn-secondary">Login</button>
+    </form>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+<script >
+    $(document).ready(function(){
+        // login request
+        $("#login").click(function(e){
+            e.preventDefault()
+            let formData = new FormData();
+            formData.append('email', $('#email').val().trim());
+            formData.append('password', $('#password').val().trim());
+            const loginUrl = 'http://localhost:8000/api/token/'
+            $.ajax({
+                url: loginUrl,
+                type: "POST",
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    // store tokens in localStorage
+                    window.localStorage.setItem('refreshToken', data['refresh']);
+                    window.localStorage.setItem('accessToken', data['access']);
+                    alert('Success!');
+                    $(location).attr('href', '/')
+                },
+                error: function (res, e) {
+                    console.error(res.status);
+                    console.error(res.responseText);
+                }
+            }); // end ajax
+        }); // end login request
+    });
+</script>
+</body>
+</html>

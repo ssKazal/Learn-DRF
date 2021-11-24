@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from rest_framework import serializers
-from .models import Article
+from .models import Article, Movie, Genre, User
 
 
 # ModelSerializer
@@ -12,10 +12,26 @@ class ArticleSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     articles = ArticleSerializer(many=True, read_only=True)
+    password = serializers.CharField(write_only = True, style = {'input_type': 'password'})
+    confirm_password = serializers.CharField(write_only = True, style = {'input_type': 'password'})
 
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'groups', 'articles']
+        fields = ['url', 'username', 'email', 'password', 'confirm_password', 'groups', 'articles']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        confirm_password = validated_data.pop('confirm_password')
+        if not password or not confirm_password:
+            raise serializers.ValidationError("Please enter a password and "
+                "confirm it.")
+        if password != confirm_password:
+            raise serializers.ValidationError("Those passwords don't match.")
+        else:
+            user = super().create(validated_data)
+            user.set_password(password)
+            user.save()
+            return user
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -43,3 +59,19 @@ class ArticleSerializer(serializers.Serializer):
         instance.save()
         return instance
 """
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = '__all__'
+
+
+class MovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['genre'] = GenreSerializer(instance.genre).data
+        return response

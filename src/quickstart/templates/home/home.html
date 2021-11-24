@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div>
+        <h1>Home</h1>
+        <a href="{% url 'login'%}">Login</a>
+        <button class="btn" id="logout">Logout</button>
+    </div>
+    <div>
+        <button class="btn btn-primary" id="get_data">Get Data</button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script >
+        $(document).ready(function(){
+            // get users
+            $("#get_data").click(function (e) {
+                e.preventDefault();
+                const url = 'http://localhost:8000/api/genres/'
+                $.ajax({
+                    url: url,
+                    headers: {
+                        'Authorization': `Bearer ${window.localStorage.getItem('accessToken')}`
+                    },
+                    type: "GET",
+                    tokenFlag: true,
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: handleAjaxError
+                }); // end ajax
+            })
+
+            function handleAjaxError(res, e) {
+                /*
+                    And if it returns 401, then we call obtainAccessTokenWithRefreshToken() method 
+                    To get a new access token using refresh token.
+                */
+                if (res.status == 401) {
+                    if (this.tokenFlag) {
+                        this.tokenFlag = false;
+                        if (obtainAccessTokenWithRefreshToken()) {
+                            this.headers["Authorization"] = `Bearer ${window.localStorage.getItem('accessToken')}`
+                            $.ajax(this);  // calling API endpoint again with new access token
+                        }
+                    }
+                } else {
+                    console.error(res.responseText);
+                }
+            }
+
+            function obtainAccessTokenWithRefreshToken() {
+                /*
+                    This method will create new access token by using refresh token.
+                    If refresh token is invalid it will redirect user to login page
+                */
+                let flag = true;
+                let formData = new FormData();
+                const refreshUrl = 'http://localhost:8000/api/token/refresh/'
+                formData.append('refresh', window.localStorage.getItem('refreshToken'));
+                $.ajax({
+                    url: refreshUrl,
+                    type: "POST",
+                    data: formData,
+                    async: false,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        window.localStorage.setItem('accessToken', data['access']);
+                    },
+                    error: function (rs, e) {
+                        if (rs.status == 401) {
+                            flag = false;
+                            alert('Please login to access!');
+                            window.location.href = "/login/";
+                        } else {
+                            console.error(rs.responseText);
+                        }
+                    }
+                }); // end ajax
+                return flag
+            }
+
+            $("#logout").click(function (e){
+                e.preventDefault();
+                window.localStorage.removeItem('refreshToken');
+                window.localStorage.removeItem('accessToken');
+                window.location.href = "/login/";
+            })
+        });
+    </script>
+</body>
+</html>
