@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 from .models import Article, Movie, Genre, User
+# from rest_framework_simplejwt.tokens import RefreshToken
 
 
 # ModelSerializer
@@ -17,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'password', 'confirm_password', 'groups', 'articles']
+        fields = ['id', 'url', 'email', 'password', 'confirm_password', 'groups', 'articles']
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -75,3 +76,11 @@ class MovieSerializer(serializers.ModelSerializer):
         response = super().to_representation(instance)
         response['genre'] = GenreSerializer(instance.genre).data
         return response
+
+
+# def get_tokens_for_user(user):
+#     refresh = RefreshToken.for_user(user)
+#     return {
+#         'refresh': str(refresh),
+#         'access': str(refresh.access_token),
+#     }

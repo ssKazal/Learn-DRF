@@ -144,9 +144,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'main.pagination.CustomPagination',
     # 'PAGE_SIZE': 5,
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permissions.AllowAny',
-    # ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     # 'DEFAULT_RENDERER_CLASSES': (
     #     'rest_framework.renderers.JSONRenderer',
@@ -158,8 +158,10 @@ REST_FRAMEWORK = {
 
 
 CORS_ORIGIN_WHITELIST = (
-'http://localhost:3000',
-'http://localhost:8000',
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:3000',
 )
 
 AUTH_USER_MODEL = 'user.User'

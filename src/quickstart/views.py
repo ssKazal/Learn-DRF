@@ -12,6 +12,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -19,7 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from user import models
 
-from .permissions import IsSuperuser, IsCourseAdmin
+from .permissions import IsSuperuser, IsCourseAdmin, UserPermission
 from .serializers import UserSerializer, GroupSerializer, ArticleSerializer, GenreSerializer, MovieSerializer
 from .models import Article, Genre, Movie, User
 
@@ -44,7 +45,8 @@ def registration(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-
+    permission_classes = [UserPermission]
+    
 
 class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
@@ -194,8 +196,14 @@ class AuthorViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-
+    permission_classes = [IsAuthenticated]
 
 class MovieViewSet(viewsets.ModelViewSet):
     serializer_class = MovieSerializer
     queryset = Movie.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    # def finalize_response(self, request, *args, **kwargs):
+    #     response = super(MovieViewSet, self).finalize_response(request, *args, **kwargs)
+    #     response['WWW-Authenticate'] = 'Token'
+    #     return response
