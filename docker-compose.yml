@@ -1,12 +1,12 @@
-version: "3.9"
+version: "3"
    
 services:
   db:
     image: postgres
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=learndrfdb
+      - POSTGRES_USER=learndrfuser
+      - POSTGRES_PASSWORD=learndrfpass
   app:
     build: .
     command: python src/manage.py runserver 0.0.0.0:8000
